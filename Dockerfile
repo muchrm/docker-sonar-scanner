@@ -25,4 +25,4 @@ WORKDIR /root/project
 CMD sonar-scanner \
   -Dproject.settings=sonar-project.properties \
   -Dsonar.host.url=$HOST \
-  -Dsonar.login=cbeb49149a2f2ce1b5272129d402e5b63903973e
+  -Dsonar.login=$LOGIN
