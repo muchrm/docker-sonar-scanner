@@ -1,13 +1,8 @@
 FROM openjdk:8-alpine
-
-#install node
-RUN curl -sSL https://get.docker.com/ | sh
-
-RUN apk add --no-cache nodejs
+#install node docker
+RUN apk add --no-cache nodejs docker
 
 #install sonar
-
-
 RUN apk add --no-cache  --virtual .build-deps-sonar curl grep sed unzip
 ENV SONAR_VERSION 3.1.0.1141
 ENV TZ=Asia/Bangkok
