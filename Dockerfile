@@ -1,29 +1,30 @@
 FROM openjdk:8-alpine
+
+ENV TZ=Asia/Bangkok
+RUN apk --no-cache add \
+		tzdata \
+	&& cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+	&& apk del tzdata
+
 #install node docker
 RUN apk add --no-cache nodejs docker
 
-#install sonar
-RUN apk add --no-cache  --virtual .build-deps-sonar curl grep sed unzip
-ENV SONAR_VERSION 3.1.0.1141
-ENV TZ=Asia/Bangkok
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV SONAR_VERSION 3.2.0.1227
+ENV HOST=http://localhost:9000
+ENV PROJECTKEY=test
+ENV LOGIN=some-token
+ENV SONAR_RUNNER_HOME=/root/sonar-scanner-$SONAR_VERSION-linux
+ENV PATH=$PATH:/root/sonar-scanner-$SONAR_VERSION-linux/bin
 
 WORKDIR /root
-
-RUN curl --insecure -o ./sonarscanner.zip -L \
+#install sonar
+RUN apk add --no-cache  --virtual .build-deps-sonar curl grep sed unzip \
+  && curl --insecure -o ./sonarscanner.zip -L \
   https://sonarsource.bintray.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_VERSION-linux.zip \
   && unzip sonarscanner.zip \
-  && rm -f sonarscanner.zip
-
-ENV SONAR_RUNNER_HOME=/root/sonar-scanner-$SONAR_VERSION-linux
-ENV PATH $PATH:/root/sonar-scanner-$SONAR_VERSION-linux/bin
-#   ensure Sonar uses the provided Java for musl instead of a borked glibc one
-RUN sed -i 's/use_embedded_jre=true/use_embedded_jre=false/g' /root/sonar-scanner-$SONAR_VERSION-linux/bin/sonar-scanner \
+  && rm -f sonarscanner.zip\
+  && sed -i 's/use_embedded_jre=true/use_embedded_jre=false/g' /root/sonar-scanner-$SONAR_VERSION-linux/bin/sonar-scanner \
   && apk del .build-deps-sonar
-
-ENV HOST=http://sonarqube:9000
-ENV PROJECTKEY=mis-backend
-ENV LOGIN=cbeb49149a2f2ce1b5272129d402e5b63903973e
 
 WORKDIR /root/project
 CMD sonar-scanner \
