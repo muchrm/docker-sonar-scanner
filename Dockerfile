@@ -1,4 +1,4 @@
-FROM openjdk:8-alpine
+FROM alpine:3.8
 
 ENV TZ=Asia/Bangkok
 RUN apk --no-cache add \
@@ -7,23 +7,23 @@ RUN apk --no-cache add \
 	&& apk del tzdata
 
 #install node docker
-RUN apk add --no-cache nodejs docker
+RUN apk add --no-cache openjdk8-jre nodejs nodejs-npm docker
 
 ENV SONAR_VERSION 3.2.0.1227
 ENV HOST=http://localhost:9000
 ENV PROJECTKEY=test
 ENV LOGIN=some-token
 ENV SONAR_RUNNER_HOME=/root/sonar-scanner-$SONAR_VERSION-linux
-ENV PATH=$PATH:/root/sonar-scanner-$SONAR_VERSION-linux/bin
+ENV PATH=$PATH:$SONAR_RUNNER_HOME/bin
 
 WORKDIR /root
 #install sonar
 RUN apk add --no-cache  --virtual .build-deps-sonar curl grep sed unzip \
   && curl --insecure -o ./sonarscanner.zip -L \
-  https://sonarsource.bintray.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_VERSION-linux.zip \
+  https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_VERSION-linux.zip \
   && unzip sonarscanner.zip \
   && rm -f sonarscanner.zip\
-  && sed -i 's/use_embedded_jre=true/use_embedded_jre=false/g' /root/sonar-scanner-$SONAR_VERSION-linux/bin/sonar-scanner \
+  && sed -i 's/use_embedded_jre=true/use_embedded_jre=false/g' $SONAR_RUNNER_HOME/bin/sonar-scanner \
   && apk del .build-deps-sonar
 
 WORKDIR /root/project
